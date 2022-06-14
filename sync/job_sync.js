@@ -1,61 +1,51 @@
 import CreateConnection from '../db/mysql.js';
 import axios from 'axios';
-import util from 'util';
 
-const Conn = await CreateConnection();
+const Conn = CreateConnection();
 
-// const query = util.promisify(Conn.query).bind(Conn)
+function syncData(parity, resolution, data, mts) {
+    if(data.length == 0 || (data[0][0] == mts && data.length == 1)) {
+        console.log(`No new data || Sync ${parity[1].symbol}(${resolution})`)
+        return;
+    }
 
-async function getLastRegistryCandle(idParity, resolution = '1m') {
-    (async () => {
-        let result = 0;
+    if(data[0] == "error") {
+        console.log(`Unexpected Error || Sync ${parity[1].symbol}(${resolution})`)
+        return;
+    }
 
-       
-    })()
+    let query = '';
+    var mts, open, close, high, low, volume;
 
-    // (async () => {
-    //     try {
-    //         const result = await Conn.query(`
-    //         SELECT mts
-    //         FROM candle_${resolution}
-    //         WHERE id_moedas_pares = ${idParity} AND volume > 0
-    //         ORDER BY mts DESC
-    //         LIMIT 0,1
-    //         `);
+    data.map(async (candle, i) => {
+        mts = candle[0];
+        open = candle[1].toFixed(8);
+        close = candle[2].toFixed(8);
+        high = candle[3].toFixed(8);
+        low = candle[4].toFixed(8);
+        volume = candle[5].toFixed(8);
 
-    //         let timestamp = new Date().getTime();
-    //         return [result, timestamp];
-    //     } finally {
-    //         Conn.end();
-    //     }
-    //   })()
+        query += `(${parity[0]}, ${mts}, ${open}, ${close}, ${high}, ${low}, ${volume}),`
 
-    // let result = Conn.query(`
-    //     SELECT mts
-    //     FROM candle_${resolution}
-    //     WHERE id_moedas_pares = ${idParity} AND volume > 0
-    //     ORDER BY mts DESC
-    //     LIMIT 0,1`);
-        
-    //     result.on('result', (result)=>{
-    //         let timestamp = new Date().getTime();
-    //         return [result, timestamp];
-    //     })
-        
-    // let resp = Conn.query(`
-    //     SELECT mts
-    //     FROM candle_${resolution}
-    //     WHERE id_moedas_pares = ${idParity} AND volume > 0
-    //     ORDER BY mts DESC
-    //     LIMIT 0,1`)
+        if(i == (data.length - 1)){
+            query = query.slice(0, -1);
+        }
+    });
 
-    //     console.log(resp)
-        // return rows, fields
+    Conn.query(`INSERT IGNORE INTO candle_${resolution} (id_moedas_pares,mts, open, close, high, low, volume) VALUES ${query}`, (err, result, field) => {
+        if (err) {
+            throw err
+        }
+
+        console.log(`Ending Sync ${parity[1].symbol}(${resolution})`)
+    })
+
+    return;
 }
 
-async function syncCandles(parity, resolution = '1m') {
-    console.log(`Sync ${parity[1].symbol}`)
-
+async function syncCandles(parity, resolution) {
+    console.log(`Sync ${parity[1].symbol} || ${resolution}`)
+    
     Conn.query(`SELECT mts
     FROM candle_${resolution}
     WHERE id_moedas_pares = ${parity[0]} AND volume > 0
@@ -64,7 +54,9 @@ async function syncCandles(parity, resolution = '1m') {
         if (err) {
             throw err
         }
-        let mts = result[0].mts
+
+        let mts;
+        result[0] == undefined ? mts = 1603754788000 : mts = result[0].mts;
         let timestamp = new Date().getTime();
 
         axios.get(`https://api-pub.bitfinex.com/v2/candles/trade:${resolution}:t${parity[1].sync_symbol}/hist`, {
@@ -75,13 +67,15 @@ async function syncCandles(parity, resolution = '1m') {
                 limit: 10000
             }
         }).then((response) => {
-            // console.log(response.data)
-            // SyncData(parity[0], resolution, response.data, mts)
+            syncData(parity, resolution, response.data, mts)
         }).catch((err) => {
-            console.log('erro')
+            if(err?.request){
+                console.log(`Error: Status ${err.request.res.statusCode} (${err.request.res.statusMessage}) || Sync ${parity[1].symbol}(${resolution})`)
+            } else {
+                console.log(err)
+            }
         })
     })
-
 }
 
 export default syncCandles
