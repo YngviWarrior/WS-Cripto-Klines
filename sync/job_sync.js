@@ -75,8 +75,8 @@ async function syncCandles(parity, resolution = '1m') {
                 limit: 10000
             }
         }).then((response) => {
-            console.log(response.data)
-            SyncData(parity[0], resolution, response.data, mts)
+            // console.log(response.data)
+            // SyncData(parity[0], resolution, response.data, mts)
         }).catch((err) => {
             console.log('erro')
         })
