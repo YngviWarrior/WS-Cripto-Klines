@@ -88,13 +88,7 @@ function getAllParities(){
 var allParities = await getAllParities(); // possible future optimization problem by each login
 
 function checkParityResolution(parity, resolution) {
-    if (allParities.hasOwnProperty(parity) === true) {
-        if (allresolutions.includes(resolution) === true) {
-            return true;
-        }
-    }
-
-    return false;
+    return Object.values(allParities).filter(p => p.symbol == parity)[0].symbol == parity && allresolutions.includes(resolution);
 }
 
 export { allParities, allresolutions, checkParityResolution }

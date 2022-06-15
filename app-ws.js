@@ -19,11 +19,6 @@ function sendCandle(client, symbol, resolution) {
 
     const w = new WebSocket('wss://api-pub.bitfinex.com/ws/2')
     
-    w.on('message', (msg) => {
-        let response = JSON.stringify(JSON.parse(msg))        
-        client.send(response)
-    })
-
     let msg = JSON.stringify({ 
       event: 'subscribe', 
       channel: 'candles', 
@@ -31,6 +26,11 @@ function sendCandle(client, symbol, resolution) {
     })
 
     w.on('open', () => w.send(msg))
+
+    w.on('message', (msg) => {
+        let response = JSON.stringify(JSON.parse(msg))        
+        client.send(response)
+    })
 }
 
 function onConnection(client, req, clients) {
@@ -81,9 +81,9 @@ export default () => {
     return wss;
 }
 	
-function corsValidation(origin) {
-    return process.env.CORS_ORIGIN === '*' || process.env.CORS_ORIGIN.startsWith(origin);
-}
+// function corsValidation(origin) {
+//     return process.env.CORS_ORIGIN === '*' || process.env.CORS_ORIGIN.startsWith(origin);
+// }
 
 // function verifyClient(info, callback) {
 //     if (!corsValidation(info.origin)) return callback(false);

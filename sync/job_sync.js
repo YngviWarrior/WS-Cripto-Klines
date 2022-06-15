@@ -5,12 +5,12 @@ const Conn = CreateConnection();
 
 function syncData(parity, resolution, data, mts) {
     if(data.length == 0 || (data[0][0] == mts && data.length == 1)) {
-        console.log(`No new data || Sync ${parity[0]}(${resolution})`)
+        console.log(`No new data || Sync ${parity[1].symbol}(${resolution})`)
         return;
     }
 
     if(data[0] == "error") {
-        console.log(`Unexpected Error || Sync ${parity[0]}(${resolution})`)
+        console.log(`Unexpected Error || Sync ${parity[1].symbol}(${resolution})`)
         return;
     }
 
@@ -37,14 +37,14 @@ function syncData(parity, resolution, data, mts) {
             throw err
         }
 
-        console.log(`Ending Sync ${parity[0]}(${resolution})`)
+        console.log(`Ending Sync ${parity[1].symbol}(${resolution})`)
     })
 
     return;
 }
 
 async function syncCandles(parity, resolution) {
-    console.log(`Sync ${parity[0]}(${resolution})`)
+    console.log(`Sync ${parity[1].symbol}(${resolution})`)
     
     Conn.query(`SELECT mts
     FROM candle_${resolution}
@@ -70,7 +70,7 @@ async function syncCandles(parity, resolution) {
             syncData(parity, resolution, response.data, mts)
         }).catch((err) => {
             if(err?.request){
-                console.log(`Error: Status ${err.request.res.statusCode} (${err.request.res.statusMessage}) || Sync ${parity[0]}(${resolution})`)
+                console.log(`Error: Status ${err.request.res.statusCode} (${err.request.res.statusMessage}) || Sync ${parity[1].symbol}(${resolution})`)
             } else {
                 console.log(err)
             }
