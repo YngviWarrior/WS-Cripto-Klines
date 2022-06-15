@@ -15,52 +15,52 @@ const allresolutions = [
 
 /*
 const allParities = {
-    2 :{
-        symbol: "BTCUSDT", 
+    "BTCUSDT" :{
+        id: 2, 
         sync_symbol: "BTCUSD",
     },
-    3 :{
-        symbol: "DSHUSDT", 
+    "DSHUSDT" :{
+        id: 3, 
         sync_symbol: "DSHUSD",
     },
-    4 :{
-        symbol: "LTCUSDT", 
+    "LTCUSDT" :{
+        id: 4, 
         sync_symbol: "LTCUSD",
     },
-    6 :{
-        symbol: "DOGUSDT", 
+    "DOGUSDT" :{
+        id: 6, 
         sync_symbol: "DOGUSD",
     },
-    7 :{
-        symbol: "TRXUSDT", 
+    "TRXUSDT" :{
+        id: 7, 
         sync_symbol: "TRXUSD",
     },
-    8 :{
-        symbol: "ADAUSDT", 
+    "ADAUSDT" :{
+        id: 8, 
         sync_symbol: "ADAUSD",
     },
-    11 :{
-        symbol: "LUNAUSDT", 
+    "LUNAUSDT" :{
+        id: 11, 
         sync_symbol: "LUNAUSD",
     },
-    12 :{
-        symbol: "ATOUSDT", 
+    "ATOUSDT" :{
+        id: 12, 
         sync_symbol: "ATOUSD",
     },
-    13 :{
-        symbol: "LINKUSDT", 
+    "LINKUSDT" :{
+        id: 13, 
         sync_symbol: "LINKUSD",
     },
-    14 :{
-        symbol: "DOTUSDT", 
+    "DOTUSDT" :{
+        id: 14, 
         sync_symbol: "DOTUSD",
     },
-    15 :{
-        symbol: "FTMUSDT", 
+    "FTMUSDT" :{
+        id: 15, 
         sync_symbol: "FTMUSD",
     },
-    16 :{
-        symbol: "SOLUSDT", 
+    "SOLUSDT" :{
+        id: 16, 
         sync_symbol: "SOLUSD",
     },
 }
@@ -88,7 +88,13 @@ function getAllParities(){
 var allParities = await getAllParities(); // possible future optimization problem by each login
 
 function checkParityResolution(parity, resolution) {
-    return allresolutions.includes(resolution) && allParities.includes(parity);
+    if (allParities.hasOwnProperty(parity) === true) {
+        if (allresolutions.includes(resolution) === true) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 export { allParities, allresolutions, checkParityResolution }

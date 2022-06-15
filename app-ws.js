@@ -8,19 +8,29 @@ function onError(ws, err) {
     ws.send(err.message);
 }
 
-function onMessage(ws, data) {
-    console.log(`onMessage: ${data}`);
-    ws.send(`recebido!`);
-}
-
 function sendCandle(client, symbol, resolution) {
-    let data = cache.get(`${symbol}/${resolution}`)
-    if(data == null) {
-        client.send(JSON.stringify({resolution: resolution}));
-        cache.set(`${symbol}/${resolution}`, symbol)
-    } else {
-        client.send(JSON.stringify({resolution: cache.get(`${symbol}/${resolution}`)}));
-    }
+    // let data = cache.get(`${symbol}/${resolution}`)
+    // if(data == null) {
+    //     client.send(JSON.stringify({resolution: resolution}));
+    //     cache.set(`${symbol}/${resolution}`, symbol)
+    // } else {
+    //     client.send(JSON.stringify({resolution: cache.get(`${symbol}/${resolution}`)}));
+    // }
+
+    const w = new WebSocket('wss://api-pub.bitfinex.com/ws/2')
+    
+    w.on('message', (msg) => {
+        let response = JSON.stringify(JSON.parse(msg))        
+        client.send(response)
+    })
+
+    let msg = JSON.stringify({ 
+      event: 'subscribe', 
+      channel: 'candles', 
+      key: `trade:${resolution}:t${symbol.slice(0,-1)}` //'trade:TIMEFRAME:SYMBOL'
+    })
+
+    w.on('open', () => w.send(msg))
 }
 
 function onConnection(client, req, clients) {
@@ -29,7 +39,7 @@ function onConnection(client, req, clients) {
     const metadata = { id, color };
 
     clients.set(client, metadata);
-
+    
     if (!client) {
         try {
             client.on('close', onError(client, {status: 0, message: 'no Client found'}));
@@ -37,11 +47,11 @@ function onConnection(client, req, clients) {
             console.log(e)
         }
     } 
-
+    
     let symbol = req.url.replace('/candles/', '').split('/')[0]
     let resolution = req.url.replace('/candles/', '').split('/')[1]
 
-    if (checkParityResolution(symbol, resolution) === false){   
+    if (checkParityResolution(symbol, resolution) === false){
         try {
             if (client.readyState === WebSocket.OPEN) {
                 let error = {status: 0, message: 'no resolution found'};
@@ -52,20 +62,9 @@ function onConnection(client, req, clients) {
         }
     }
 
-    switch (symbol) {
-        case 'BTCUSDT':
-            if (client.readyState === WebSocket.OPEN) {
-                
-                sendCandle(client, symbol, resolution)
-            }
-        break;
-
-        case 'ETHUSDT':
-            if (client.readyState === WebSocket.OPEN) {
-                
-                sendCandle(client, symbol, resolution)
-            }
-        break;
+    if (client.readyState === WebSocket.OPEN) {
+        console.log(symbol)
+        sendCandle(client, symbol, resolution)
     }
 }
 
@@ -75,9 +74,7 @@ export default () => {
     const clients = new Map();
 
     wss.on('connection', (client, req) => {
-        setInterval(() => {
-            onConnection(client, req, clients)        
-        }, 1000)
+        onConnection(client, req, clients)
     });
 
     console.log(`App Web Socket Server is running!`);

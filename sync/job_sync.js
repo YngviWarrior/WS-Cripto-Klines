@@ -5,12 +5,12 @@ const Conn = CreateConnection();
 
 function syncData(parity, resolution, data, mts) {
     if(data.length == 0 || (data[0][0] == mts && data.length == 1)) {
-        console.log(`No new data || Sync ${parity[1].symbol}(${resolution})`)
+        console.log(`No new data || Sync ${parity[0]}(${resolution})`)
         return;
     }
 
     if(data[0] == "error") {
-        console.log(`Unexpected Error || Sync ${parity[1].symbol}(${resolution})`)
+        console.log(`Unexpected Error || Sync ${parity[0]}(${resolution})`)
         return;
     }
 
@@ -25,7 +25,7 @@ function syncData(parity, resolution, data, mts) {
         low = candle[4].toFixed(8);
         volume = candle[5].toFixed(8);
 
-        query += `(${parity[0]}, ${mts}, ${open}, ${close}, ${high}, ${low}, ${volume}),`
+        query += `(${parity[1].id}, ${mts}, ${open}, ${close}, ${high}, ${low}, ${volume}),`
 
         if(i == (data.length - 1)){
             query = query.slice(0, -1);
@@ -37,18 +37,18 @@ function syncData(parity, resolution, data, mts) {
             throw err
         }
 
-        console.log(`Ending Sync ${parity[1].symbol}(${resolution})`)
+        console.log(`Ending Sync ${parity[0]}(${resolution})`)
     })
 
     return;
 }
 
 async function syncCandles(parity, resolution) {
-    console.log(`Sync ${parity[1].symbol} || ${resolution}`)
+    console.log(`Sync ${parity[0]}(${resolution})`)
     
     Conn.query(`SELECT mts
     FROM candle_${resolution}
-    WHERE id_moedas_pares = ${parity[0]} AND volume > 0
+    WHERE id_moedas_pares = ${parity[1].id} AND volume > 0
     ORDER BY mts DESC
     LIMIT 0,1`, (err, result, field) => {
         if (err) {
@@ -70,7 +70,7 @@ async function syncCandles(parity, resolution) {
             syncData(parity, resolution, response.data, mts)
         }).catch((err) => {
             if(err?.request){
-                console.log(`Error: Status ${err.request.res.statusCode} (${err.request.res.statusMessage}) || Sync ${parity[1].symbol}(${resolution})`)
+                console.log(`Error: Status ${err.request.res.statusCode} (${err.request.res.statusMessage}) || Sync ${parity[0]}(${resolution})`)
             } else {
                 console.log(err)
             }
