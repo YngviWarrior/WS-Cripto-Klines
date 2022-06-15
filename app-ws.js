@@ -9,27 +9,57 @@ function onError(ws, err) {
 }
 
 function sendCandle(client, symbol, resolution) {
-    // let data = cache.get(`${symbol}/${resolution}`)
-    // if(data == null) {
-    //     client.send(JSON.stringify({resolution: resolution}));
-    //     cache.set(`${symbol}/${resolution}`, symbol)
-    // } else {
-    //     client.send(JSON.stringify({resolution: cache.get(`${symbol}/${resolution}`)}));
-    // }
+    // const w = new WebSocket('wss://api-pub.bitfinex.com/ws/2')
+    
+    // let msg = JSON.stringify({ 
+    //   event: 'subscribe', 
+    //   channel: 'candles', 
+    //   key: `trade:${resolution}:t${symbol.slice(0,-1)}` //'trade:TIMEFRAME:SYMBOL'
+    // })
 
-    const w = new WebSocket('wss://api-pub.bitfinex.com/ws/2')
+    // w.on('open', () => w.send(msg))
+
+    // w.on('message', (msg) => {
+    //     console.log('oi')
+    //     let response = JSON.stringify(JSON.parse(msg))        
+    //     client.send(response)
+    // })
+
+    const w = new WebSocket('wss://stream.binance.com/stream')
     
     let msg = JSON.stringify({ 
-      event: 'subscribe', 
-      channel: 'candles', 
-      key: `trade:${resolution}:t${symbol.slice(0,-1)}` //'trade:TIMEFRAME:SYMBOL'
+        id: 1,
+        method: "SUBSCRIBE",
+        params: [
+          `${symbol.toLowerCase()}@kline_${resolution}`
+        ]
+    })
+    
+    w.on('open', () => w.send(msg))
+    
+    w.on('ping', (msg) => {
+        let response = JSON.stringify(JSON.parse(msg))  
+        console.log(response)
+        w.pong()
     })
 
-    w.on('open', () => w.send(msg))
-
     w.on('message', (msg) => {
-        let response = JSON.stringify(JSON.parse(msg))        
-        client.send(response)
+        let response = JSON.parse(msg)
+        let send;
+
+        if (response?.stream == `${symbol.toLowerCase()}@kline_${resolution}`) {
+            send = [
+                response.data.k.t, //"mts"
+                response.data.k.o, //"open"
+                // response.data.k.o, //"open_custom"
+                response.data.k.c, //"close"
+                response.data.k.h, //"high"
+                response.data.k.l, //"low"
+                response.data.k.v  //"volume"
+            ]
+
+            client.send(JSON.stringify(send))
+        }
     })
 }
 
@@ -48,8 +78,8 @@ function onConnection(client, req, clients) {
         }
     } 
     
-    let symbol = req.url.replace('/candles/', '').split('/')[0]
-    let resolution = req.url.replace('/candles/', '').split('/')[1]
+    let symbol = req.url.replace('/candle/', '').split('/')[0]
+    let resolution = req.url.replace('/candle/', '').split('/')[1]
 
     if (checkParityResolution(symbol, resolution) === false){
         try {

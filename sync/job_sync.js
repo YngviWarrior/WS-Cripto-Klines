@@ -70,7 +70,7 @@ async function syncCandles(parity, resolution) {
             syncData(parity, resolution, response.data, mts)
         }).catch((err) => {
             if(err?.request){
-                console.log(`Error: Status ${err.request.res.statusCode} (${err.request.res.statusMessage}) || Sync ${parity[1].symbol}(${resolution})`)
+                console.log(`Error: Status ${err?.request?.res?.statusCode} (${err?.request?.res?.statusMessage}) || Sync ${parity[1].symbol}(${resolution})`)
             } else {
                 console.log(err)
             }
