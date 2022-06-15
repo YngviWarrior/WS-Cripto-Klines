@@ -2,10 +2,10 @@ import mysql from 'mysql';
 
 function CreateConnection() {
     var conn = mysql.createConnection({
-            host: "localhost",
-            user: "igor",
-            password: "123456",
-            database: 'rhenyx'
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_DATABASE,
         });
       
     conn.connect(function(err) {
