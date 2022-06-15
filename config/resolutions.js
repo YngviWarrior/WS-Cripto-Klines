@@ -1,3 +1,7 @@
+import CreateConnection from '../db/mysql.js';
+
+const Conn = await CreateConnection();
+
 const allresolutions = [
     '1m',
     '5m',
@@ -9,6 +13,7 @@ const allresolutions = [
     '1month',
 ];
 
+/*
 const allParities = {
     2 :{
         symbol: "BTCUSDT", 
@@ -59,7 +64,29 @@ const allParities = {
         sync_symbol: "SOLUSD",
     },
 }
-    
+*/
+
+function getAllParities(){
+    return new Promise(function (resolve, reject) {
+        Conn.query('SELECT id, nome, symbol, id_coin1, id_coin2, utilizar_giro, symbol_sync,sync_only_exchange_rate FROM moedas_pares WHERE 1 = 1', (err, result, field, allParities) => {
+            if (err) {
+                return reject(err);
+            }
+            /* getting info from db */
+            const coinsFromDb = Object.keys(result).map(resultId /* primary key for each result from db */ => {
+                const coin = result[resultId];
+                return {...coin};
+            })
+            let coinsResult={}
+            /* building object like { idCoin -> str : { id: 2, ... } } */
+            coinsFromDb.map((coinRaw) => coinsResult[coinRaw.id]=coinRaw);
+            resolve(coinsResult)
+        })
+    });
+}
+
+var allParities = await getAllParities(); // possible future optimization problem by each login
+
 function checkParityResolution(parity, resolution) {
     return allresolutions.includes(resolution) && allParities.includes(parity);
 }
