@@ -63,7 +63,6 @@ function onConnection(client, req, clients) {
     }
 
     if (client.readyState === WebSocket.OPEN) {
-        console.log(symbol)
         sendCandle(client, symbol, resolution)
     }
 }
