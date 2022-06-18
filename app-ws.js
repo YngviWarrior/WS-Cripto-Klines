@@ -51,7 +51,6 @@ function sendCandle(client, symbol, resolution) {
             send = [
                 response.data.k.t, //"mts"
                 response.data.k.o, //"open"
-                // response.data.k.o, //"open_custom"
                 response.data.k.c, //"close"
                 response.data.k.h, //"high"
                 response.data.k.l, //"low"
