@@ -35,7 +35,6 @@ function onConnection(client, req, cache) {
             if (cache.get(`${symbol}/${resolution}`) != undefined) {
                 client.send(cache.get(`${symbol}/${resolution}`));
             }
-
         }, 1200);
     }
 }
