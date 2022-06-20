@@ -6,7 +6,7 @@ function onError(ws, err) {
     ws.send(err.message);
 }
 
-function onConnection(client, req) {    
+function onConnection(client, req, cache) {    
     if (!client) {
         try {
             client.on('close', onError(client, {status: 0, message: 'no Client found'}));
@@ -31,19 +31,20 @@ function onConnection(client, req) {
     }
 
     if (client.readyState === WebSocket.OPEN) {
-        parity_id = Object.values(allParities).filter(p => p.symbol == symbol)[0].id;
-        // console.log('oi');            
-        // setInterval(() => {
-        //     console.log('oi2');
-        // }, 1200);
+        setInterval(() => {
+            if (cache.get(`${symbol}/${resolution}`) != undefined) {
+                client.send(cache.get(`${symbol}/${resolution}`));
+            }
+
+        }, 1200);
     }
 }
 
-export default (DBConn) => {
+export default (cache) => {
     const wss = new WebSocketServer({ port: 3000 });
 
     wss.on('connection', (client, req) => {
-        onConnection(client, req, DBConn)
+        onConnection(client, req, cache)
     });
 
     console.log(`App Web Socket Server is running!`);

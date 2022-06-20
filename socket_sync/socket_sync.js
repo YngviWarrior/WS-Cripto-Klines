@@ -1,64 +1,74 @@
 import WebSocket from 'ws';
 import CreateConnection from '../db/mysql.js';
-import NodeCache from 'node-cache';
 import { allParities, allresolutions } from '../config/resolutions.js';
 
 const DBConn = await CreateConnection();
-const cache = new NodeCache({ stdTTL: 60 });
 const exchange = 'Binance';
 let subscription;
+let subscription_param = [];
 let data;
 
-export default async function startSync() {
+export default async function startSync(cache) {
     let list = Object.keys(allParities).map(function (key) { return allParities[key]; });
-    
-    allresolutions.forEach(async (resolution) => {
-        list.forEach(async (parity) => {
-            if(parity.symbol == 'BTCUSDT'){
-                await getCandle(parity.symbol, resolution);
+    let symbol;
+
+    allresolutions.forEach(resolution => {
+        list.forEach(parity => {
+            switch (parity.symbol) {
+                case 'ATOUSDT':
+                    symbol = 'ATOMUSDT';
+                    break;
+            
+                case 'DSHUSDT':
+                    symbol = 'DASHUSDT';
+                    break;
+                
+                case 'DOGUSDT':
+                    symbol = 'DOGEUSDT';
+                    break;
+                default:
+                    symbol = parity.symbol
+                    break;
             }
+
+            subscription_param.push(`${symbol.toLowerCase()}@kline_${resolution}`);
         });
+    });
+
+    getCandle(cache);
+}
+
+async function dbSync(symbol, resolution, response, amount) {
+    switch (symbol) {
+        case 'ATOMUSDT':
+            symbol = 'ATOUSDT';
+            break;
+    
+        case 'DASHUSDT':
+            symbol = 'DSHUSDT';
+            break;
+        
+        case 'DOGEUSDT':
+            symbol = 'DOGUSDT';
+            break;
+        default:
+            symbol = symbol;
+            break;
+    }
+
+    let parity_id = Object.values(allParities).filter(p => p.symbol == symbol)[0].id;    
+
+    DBConn.query(`INSERT IGNORE INTO 
+                candle_${resolution} (id_moedas_pares, mts, open, close, high, low, volume) 
+                VALUES (${parity_id}, "${response.data.k.t}", "${response.data.k.o}", "${amount}", "${response.data.k.h}", "${response.data.k.l}", "${response.data.k.v}")`,
+    (err, result, field) => {
+        if (err) {
+            throw err;
+        }
     });
 }
 
-
-async function getCandle(symbol, resolution) {
-    let parity_id = Object.values(allParities).filter(p => p.symbol == symbol)[0].id
-
-    // switch (resolution) {
-    //     case '1m':
-    //         expiration = 60;
-    //         break;
-    
-    //     case '5m':
-    //         expiration = 60 * 5;
-    //         break;
-
-    //     case '15m':
-    //         expiration = 60 * 15;
-    //         break;
-
-    //     case '30m':
-    //         expiration = 60 * 30;
-    //         break;
-
-    //     case '1h':
-    //         expiration = 60 * 60;
-    //         break;
-
-    //     case '1d':
-    //         expiration = 60 * 60 * 24;
-    //         break;
-
-    //     case '7d':
-    //         expiration = 60 * 60 * 24 * 7;
-    //         break;
-
-    //     case '1month':
-    //         expiration = 60 * 60 * 24 * 7 * 3;
-    //         break;
-    // }
-
+async function getCandle(cache) {
     switch (exchange) {
         case 'Bitfinex':
             const wssBitfinex = new WebSocket('wss://api-pub.bitfinex.com/ws/2')
@@ -84,9 +94,7 @@ async function getCandle(symbol, resolution) {
             subscription = JSON.stringify({ 
                 id: 1,
                 method: "SUBSCRIBE",
-                params: [
-                  `${symbol.toLowerCase()}@kline_${resolution}`
-                ]
+                params: subscription_param
             });
             
             wssBinance.on('open', () => wssBinance.send(subscription))
@@ -97,8 +105,8 @@ async function getCandle(symbol, resolution) {
         
             wssBinance.on('message', (candle) => {
                 let response = JSON.parse(candle);
-        
-                if (response?.stream == `${symbol.toLowerCase()}@kline_${resolution}`) {
+
+                if(response?.stream != undefined){
                     let random_percent = 0;
                     let minor_plus = 0;
                     let amount = 0;
@@ -117,17 +125,13 @@ async function getCandle(symbol, resolution) {
                         response.data.k.v  //"volume"
                     ];
 
-                    cache.set(symbol, JSON.stringify(data))
-                    console.log(cache.get(symbol))
+                    
+                    let symbol = response.stream.split('@kline_')[0].toUpperCase();
+                    let resolution = response.stream.split('@kline_')[1];
 
-                    DBConn.query(`INSERT IGNORE INTO 
-                                candle_${resolution} (id_moedas_pares, mts, open, close, high, low, volume) 
-                                VALUES (${parity_id}, ${response.data.k.t}, ${response.data.k.o}, ${amount.toString()}, ${response.data.k.h}, ${response.data.k.l}, ${response.data.k.v})`,
-                    (err, result, field) => {
-                        if (err) {
-                            throw err;
-                        }
-                    });
+                    cache.set(`${symbol}/${resolution}`, JSON.stringify(data));
+
+                    dbSync(symbol, resolution, response, amount.toString());
                 }
             })
     
