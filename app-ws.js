@@ -1,6 +1,9 @@
 import WebSocket, { WebSocketServer } from 'ws';
-import { checkParityResolution } from './config/resolutions.js';
+import { allParities, checkParityResolution } from './config/resolutions.js';
 import NodeCache from 'node-cache';
+import CreateConnection from './db/mysql.js';
+
+const Conn = CreateConnection();
 
 const cache = new NodeCache({ stdTTL: 60 });
 
@@ -8,7 +11,7 @@ function onError(ws, err) {
     ws.send(err.message);
 }
 
-function sendCandle(client, symbol, resolution) {
+function sendCandle(client, parity_id, symbol, resolution) {
     // const w = new WebSocket('wss://api-pub.bitfinex.com/ws/2')
     
     // let msg = JSON.stringify({ 
@@ -45,19 +48,37 @@ function sendCandle(client, symbol, resolution) {
 
     w.on('message', (msg) => {
         let response = JSON.parse(msg)
-        let send;
 
         if (response?.stream == `${symbol.toLowerCase()}@kline_${resolution}`) {
+            let send;
+            let random_percent = 0;
+            let minor_plus = 0;
+            let amount = 0;
+
+            random_percent = Math.random() / 1000;
+            random_percent.toString().slice(-1) % 2 == 0 ? minor_plus = true : minor_plus = false;
+
+            minor_plus === true ? amount = response.data.k.c * (1 + random_percent) : amount = response.data.k.c * (1 - random_percent);
+            // console.log(amount.toString())
             send = [
                 response.data.k.t, //"mts"
-                response.data.k.o, //"open"
-                response.data.k.c, //"close"
+                response.data.k.o, //"open" 
+                amount.toString(), //"close"
                 response.data.k.h, //"high"
                 response.data.k.l, //"low"
                 response.data.k.v  //"volume"
             ]
 
             client.send(JSON.stringify(send))
+
+            Conn.query(`INSERT IGNORE INTO 
+                        candle_${resolution} (id_moedas_pares, mts, open, close, high, low, volume) 
+                        VALUES (${parity_id}, ${response.data.k.t}, ${response.data.k.o}, ${amount.toString()}, ${response.data.k.h}, ${response.data.k.l}, ${response.data.k.v})`,
+            (err, result, field) => {
+                if (err) {
+                    throw err;
+                }
+            });
         }
     })
 }
@@ -79,6 +100,7 @@ function onConnection(client, req, clients) {
     
     let symbol = req.url.replace('/candle/', '').split('/')[0]
     let resolution = req.url.replace('/candle/', '').split('/')[1]
+    let parity_id;
 
     if (checkParityResolution(symbol, resolution) === false){
         try {
@@ -92,7 +114,8 @@ function onConnection(client, req, clients) {
     }
 
     if (client.readyState === WebSocket.OPEN) {
-        sendCandle(client, symbol, resolution)
+        parity_id = Object.values(allParities).filter(p => p.symbol == symbol)[0].id
+        sendCandle(client, parity_id, symbol, resolution)
     }
 }
 
