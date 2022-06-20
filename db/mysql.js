@@ -1,6 +1,6 @@
 import mysql from 'mysql';
 
-function CreateConnection() {
+async function CreateConnection() {
     var conn = mysql.createConnection({
             host: process.env.DB_HOST,
             user: process.env.DB_USER,
@@ -13,8 +13,7 @@ function CreateConnection() {
         console.log("Mysql Connected!");
     });
 
-    return conn
-    
+    return conn    
 }
 
 

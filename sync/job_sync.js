@@ -1,7 +1,7 @@
 import CreateConnection from '../db/mysql.js';
 import axios from 'axios';
 
-const Conn = CreateConnection();
+const Conn = await CreateConnection();
 
 async function syncData(parity, resolution, data, mts, exchange) {
     if(data.length == 0 || (data[0][0] == mts && data.length == 1)) {
