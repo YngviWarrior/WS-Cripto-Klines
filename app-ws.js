@@ -49,20 +49,3 @@ export default (cache) => {
     console.log(`App Web Socket Server is running!`);
     return wss;
 }
-	
-// function corsValidation(origin) {
-//     return process.env.CORS_ORIGIN === '*' || process.env.CORS_ORIGIN.startsWith(origin);
-// }
-
-// function verifyClient(info, callback) {
-//     if (!corsValidation(info.origin)) return callback(false);
- 
-//     const token = info.req.url.split('token=')[1];
- 
-//     if (token) {
-//         if (token === '123456')
-//             return callback(true);
-//     }
- 
-//     return callback(false);
-// }
