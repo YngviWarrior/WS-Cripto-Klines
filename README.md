@@ -1,6 +1,8 @@
 # Websocket-NodeJS
 Node version: 16.15.0
 
+Project send every 2 seconds criptoparities candles by an URL pattern . With synchronization of tables candles{resolution} into a database for an previous graph load.
+
 Install dependencies: npm i
 Install Yarn or Nodemon
 
