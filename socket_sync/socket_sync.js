@@ -135,7 +135,9 @@ async function getCandle(cache) {
 
                     cache.set(`${symbol}/${resolution}`, JSON.stringify(data));
 
-                    dbSync(symbol, resolution, response, amount.toString());
+                    if(resolution == '1m'){
+                        dbSync(symbol, resolution, response, amount.toString());
+                    }
                 }
             })
     
