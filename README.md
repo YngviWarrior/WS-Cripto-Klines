@@ -15,7 +15,9 @@ Resolution Example: 1m, 5m, 1h
 Install dependencies: npm i
 Install Yarn or Nodemon
 
-Inicialize project on terminal with yarn start command.
+Inicialize project on terminal with 'yarn start' command.
+
+-------------------------------------------------------------- Used APIs Documentations ----------------------------------------------------------
 
 Binance Rest API
 https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#general-api-information
