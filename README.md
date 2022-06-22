@@ -1,7 +1,15 @@
 # Websocket-NodeJS
 Node version: 16.15.0
 
-Project send every 2 seconds criptoparities candles by an URL pattern . With synchronization of tables candles{resolution} into a database for an previous graph load.
+-------------------------------------------------------------------- Project Resume -----------------------------------------------------------------------
+  This Websocket project send every 2 seconds criptoparities candles by an URL pattern . With synchronization of tables candles{resolution} into a database for an previous graph load.
+
+URL Parttern: ws://192.168.1.102:3000/candle/{PARITY}/{RESOLUTION}
+
+Parity Example: BTCUSDT, ETHUSDT
+Resolution Example: 1m, 5m, 1h
+
+------------------------------------------------------------------- Getting Start -------------------------------------------------------------------------
 
 Install dependencies: npm i
 Install Yarn or Nodemon
