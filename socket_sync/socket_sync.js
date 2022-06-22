@@ -36,6 +36,10 @@ export default async function startSync(cache) {
     });
 
     getCandle(cache);
+    
+    setInterval(() => {
+        getCandle(cache);
+    }, 60000 * 60 * 24);
 }
 
 async function dbSync(symbol, resolution, response, amount) {
@@ -99,7 +103,7 @@ async function getCandle(cache) {
             
             wssBinance.on('open', () => wssBinance.send(subscription))
             
-            wssBinance.on('ping', (msg) => {
+            wssBinance.on('ping', () => {
                 wssBinance.pong();
             })
         
