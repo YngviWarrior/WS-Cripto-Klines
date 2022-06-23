@@ -115,7 +115,7 @@ async function getCandle(cache) {
                     let minor_plus = 0;
                     let amount = 0;
         
-                    random_percent = Math.random() / 1500;
+                    random_percent = Math.random() / 2000;
                     random_percent.toString().slice(-1) % 2 == 0 ? minor_plus = true : minor_plus = false;
         
                     minor_plus === true ? amount = response.data.k.c * (1 + random_percent) : amount = response.data.k.c * (1 - random_percent);
