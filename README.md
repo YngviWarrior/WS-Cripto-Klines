@@ -6,6 +6,7 @@ Node version: 16.15.0
   This Websocket project send every 2 seconds criptoparities candles by an URL pattern . With synchronization of tables candles{resolution} into a database for an previous graph load.
 
 URL Parttern: ws://your-ipv4-or-localhost:3000/candle/{PARITY}/{RESOLUTION}
+Highly recommend use Postman for test WS connection.
 
 Parity Example: BTCUSDT, ETHUSDT
 Resolution Example: 1m, 5m, 1h
