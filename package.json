@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^0.27.2",
     "dotenv": "^16.0.1",
+    "locutus": "^2.0.16",
     "mysql": "^2.18.1",
     "node-cache": "^5.1.2",
     "ws": "^8.8.0"
