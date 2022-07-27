@@ -129,10 +129,10 @@ async function getCandle(cache) {
                 if(response?.stream != undefined){
                     let streamType = response?.stream.split('@');
                     let symbol = streamType[0];
-                    if(symbol == 'btcusdt'){
-                        console.log(streamType[0])
-                        console.log('Chego:' + new Date())
-                    }
+                    // if(symbol == 'btcusdt'){
+                    //     console.log(streamType[0])
+                    //     console.log('Chego:' + new Date())
+                    // }
                     switch (streamType[1]) {
                         case 'trade':
                             symbol = symbol.toUpperCase();
