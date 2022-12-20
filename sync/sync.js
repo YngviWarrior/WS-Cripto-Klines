@@ -9,6 +9,7 @@ function tooManyRequestsHandle(parity, resolution) {
 
 async function startSync(parity, resolution, milliseconds) {
     let syncSuccess;
+    console.log("chamo")
     syncSuccess = await syncCandle(parity, resolution)    
     
     if(syncSuccess === false && resolution != '1m') {

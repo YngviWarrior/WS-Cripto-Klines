@@ -55,7 +55,7 @@ async function syncData(parity, resolution, data, mts, exchange) {
             break;
     }
 
-    Conn.query(`INSERT IGNORE INTO candle_${resolution} (id_moedas_pares,mts, open, close, high, low, volume) VALUES ${query}`, (err, result, field) => {
+    Conn.query(`INSERT IGNORE INTO candle (parity, mts, open, close, high, low, volume) VALUES ${query}`, (err, result, field) => {
         if (err) {
             throw err;
         }
@@ -66,7 +66,7 @@ async function syncData(parity, resolution, data, mts, exchange) {
 
 function getMilliTimeSeconds(resolution, parityId){
     return new Promise(function (resolve, reject) {
-        Conn.query(`SELECT mts FROM candle_${resolution} WHERE id_moedas_pares = ${parityId} AND volume > 0 ORDER BY mts DESC LIMIT 0,1`, (err, result, field) => {
+        Conn.query(`SELECT mts FROM candle WHERE parity = ${parityId} AND volume > 0 ORDER BY mts DESC LIMIT 0,1`, (err, result, field) => {
             if (err) {
                 return reject(err);
             }
@@ -140,6 +140,7 @@ async function syncCandles(parity, resolution) {
                     limit: 1000
                 }
             }).then((response) => {
+                console.log(response)
                 syncData(parity, resolution, response.data, mts, rest_api);
                 return true;
             }).catch((err) => {

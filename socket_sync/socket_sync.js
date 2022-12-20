@@ -1,7 +1,6 @@
 import WebSocket from 'ws';
 import CreateConnection from '../db/mysql.js';
 import { allParities, allresolutions, tradeChannel, candleChannel } from '../config/resolutions.js';
-import { getProcessFuturePrice, getCorrectTime, findPriceInBar } from './processLastTradePrice.js';
 
 const DBConn = await CreateConnection();
 const exchange = 'Binance';
@@ -55,9 +54,10 @@ export default async function startSync(cache) {
                 }
     
                 subscription_param.push(`${symbol.toLowerCase()}@kline_${resolution}`);
-                // subscription_param.push(`${symbol.toLowerCase()}@trade`);
             });
         }
+
+        subscription_param.push(`btcusdt@kline_1m`);
     });
 
     getCandle(cache);
@@ -73,7 +73,7 @@ async function dbSync(symbol, resolution, response, amount) {
     let parity = Object.values(allParities).filter(p => p.symbol == symbol)[0];
     
     DBConn.query(`INSERT INTO 
-                candle_${resolution} (id_moedas_pares, mts, open, close, high, low, volume) 
+                candle (parity, mts, open, close, high, low, volume) 
                 VALUES (${parity.id}, "${response.data.k.t}", "${response.data.k.o}", "${amount}", "${response.data.k.h}", "${response.data.k.l}", "${response.data.k.v}")
                 ON DUPLICATE KEY UPDATE 
                 open = "${response.data.k.o}",
@@ -134,15 +134,6 @@ async function getCandle(cache) {
                     //     console.log('Chego:' + new Date())
                     // }
                     switch (streamType[1]) {
-                        case 'trade':
-                            symbol = symbol.toUpperCase();
-                            symbol = fixSymbol(symbol);
-
-                            candleChannel[symbol.slice(0, -1)].info.last_price = response.data.p;
-                            candleChannel[symbol.slice(0, -1)].info.run_last_second = new Date().getTime();
-
-                            break;
-                    
                         default:
                             let random_percent = 0;
                             let minor_plus = 0;
@@ -166,72 +157,6 @@ async function getCandle(cache) {
                             symbol = symbol.toUpperCase();
 
                             cache.set(`${symbol}/${resolution}`, JSON.stringify(data));
-
-                            // symbol = fixSymbol(symbol);
-
-
-                            // if(resolution == '1m'){
-                            //     dbSync(symbol, resolution, response, amount.toString());
-                            // }
-
-                            // let fixed_bar_price = false;
-                            // let fixed_bar_future_price = false;
-                            // let have_price_future = await getProcessFuturePrice(DBConn);
-
-                            // if(!have_price_future[0]){
-                            //     let price_in_bar = findPriceInBar(
-                            //         candleChannel[symbol.slice(0, -1)].info.id, 
-                            //         candleChannel[symbol.slice(0, -1)].info.run_last_second, 
-                            //         candleChannel[symbol.slice(0, -1)].info.sync_symbol,
-                            //         candleChannel[symbol.slice(0, -1)].info.last_price
-                            //     );
-
-                            //     if(price_in_bar[0]){
-                            //         fixed_bar_price = true;
-                            //         candleChannel[symbol.slice(0, -1)].info.last_price = price_in_bar[1];
-                            //     }
-                            // } else {
-                            //     fixed_bar_future_price = true;
-                            //     candleChannel[symbol.slice(0, -1)].info.last_price = have_price_future[2];
-                            // }
-
-                            // let correntTimeCandle = getCorrectTime(60);
-                            // let activeCandle1Mmts = correntTimeCandle.active;
-                            // let futureCandle1Mmts = correntTimeCandle.next;
-
-                            // let candle_info_list = getListCadleFromEntries(DBConn, candleChannel[symbol.slice(0, -1)].info.id, symbol, "1m", "DESC", 0, 1);
-
-                            // let candle_info_active = (candle_info_list[0].mts == activeCandle1Mmts ? candle_info_list[0]: candle_info_list[1]);
-
-                            // let candle_update = {
-                            //     "id_moedas_pares": candleChannel[symbol.slice(0, -1)].info.id,
-                            //     "mts": candle_info_active.mts,
-                            //     "open": candle_info_active.open,
-                            //     "close": candle_info_active.close,
-                            //     "high": candle_info_active.high,
-                            //     "low": candle_info_active.low,
-                            //     "volume": candle_info_active.volume,
-                            // };
-
-                            // if(have_price_future[0] && have_price_future[1]){
-                            //     candle_update.high_custom    = candle_info_active.high_custom ?? candle_info_active.high;
-                            //     candle_update.low_custom     = candle_info_active.low_custom ?? candle_info_active.low;
-                            //     candle_update.close_custom   = lastPrice;
-                            //     candle_update.id_game_custom = idGameCustom;
-                            // }
-
-                            // candle_update.concat(candle_info_active);
-
-                            // let add_end_candle;
-                            // if(fixed_bar_price) {
-                            //     add_end_candle = 'fixed_price';
-                            // }
-
-                            // if(fixed_bar_future_price) {
-                            //     add_end_candle = 'future_price';
-                            // }
-
-                            // cache.set(`${symbol}/${resolution}`, JSON.stringify(data));
                         break;
                     }
                 }

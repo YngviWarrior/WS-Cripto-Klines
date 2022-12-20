@@ -40,7 +40,7 @@ function onConnection(client, req, cache) {
 }
 
 export default (cache) => {
-    const wss = new WebSocketServer({ port: 3000 });
+    const wss = new WebSocketServer({ port: process.env.PORT });
 
     wss.on('connection', (client, req) => {
         onConnection(client, req, cache)
