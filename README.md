@@ -1,30 +1,36 @@
-# Websocket-CriptoParities-Candles
-Node version: 16.15.0
+# Websocket-Cripto-Klines
+Node version: 19
 
--------------------------------------------------------------------- Project Resume ----------------------------------------------------------------------
+- Project Resume
 
   This Websocket project send every 2 seconds criptoparities candles by an URL pattern . With synchronization of tables candles{resolution} into a database for an previous graph load.
 
-URL Parttern: ws://your-ipv4-or-localhost:3000/candle/{PARITY}/{RESOLUTION}
-Highly recommend use Postman for test WS connection.
+  URL Parttern: ws://your-ipv4-or-localhost:3000/candle/{PARITY}/{RESOLUTION}
+  Highly recommend use Postman for test WS connection.
 
-Parity Example: BTCUSDT, ETHUSDT
-Resolution Example: 1m, 5m, 1h
+  Parity Example: BTCUSDT, ETHUSDT, USDTBRL
+  Resolution Example: 1m, 5m, 15m, 30m, 1h, 1d
 
-------------------------------------------------------------------- Getting Start -------------------------------------------------------------------------
+- Getting Start
 
-Install dependencies: npm i
-Install Yarn or Nodemon
+  Step 1: $ docker-compose up -d
 
-Inicialize project on terminal with 'yarn start' command.
+  Step 2: $ docker network inspect ws-cripto-klines_wsklines_network
+    Step 2.1: Copy the Getway URL, this ip will be need to login into our mysql database. Ex: "Gateway": "192.168.80.1"
 
--------------------------------------------------------------- Used APIs Documentations ----------------------------------------------------------
+  Step 3: Open the project folder on terminal and execute the follow command: $ cat src/db/.sql | mysql -h 192.168.80.1 -u root -P 3307 -p
 
-Binance Rest API
-https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#general-api-information
+  Step 4: $ docker-compose down && docker-compose up -d
 
-Binance Socket API
-https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md
+  The Project is Ready !
 
-Bitfinex API
-https://docs.bitfinex.com/docs#api-v1-or-api-v2
+- Used APIs Documentations
+
+  Binance Rest API
+  https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#general-api-information
+
+  Binance Socket API
+  https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md
+
+  Bitfinex API
+  https://docs.bitfinex.com/docs#api-v1-or-api-v2

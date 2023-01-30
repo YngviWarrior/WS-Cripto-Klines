@@ -1,80 +1,35 @@
 import WebSocket from 'ws';
 import CreateConnection from '../db/mysql.js';
-import { allParities, allresolutions, tradeChannel, candleChannel } from '../config/resolutions.js';
+import { allParities, allresolutions } from '../config/resolutions.js';
 
 const DBConn = await CreateConnection();
 const exchange = 'Binance';
+
 let subscription;
 let subscription_param = [];
 let data;
 
-function fixSymbol(symbol) {
-    switch (symbol) {
-        case 'ATOMUSDT':
-            symbol = 'ATOUSDT';
-            break;
-    
-        case 'DASHUSDT':
-            symbol = 'DSHUSDT';
-            break;
-        
-        case 'DOGEUSDT':
-            symbol = 'DOGUSDT';
-            break;
-        default:
-            symbol = symbol;
-            break;
-    }
-
-    return symbol;
-}
-
 export default async function startSync(cache) {
     let list = Object.keys(allParities).map(function (key) { return allParities[key]; });
-    let symbol;
-
-    allresolutions.forEach(resolution => {
-        if(resolution == '1m'){
-            list.forEach(parity => {
-                switch (parity.symbol) {
-                    case 'ATOUSDT':
-                        symbol = 'ATOMUSDT';
-                        break;
-                
-                    case 'DSHUSDT':
-                        symbol = 'DASHUSDT';
-                        break;
-                    
-                    case 'DOGUSDT':
-                        symbol = 'DOGEUSDT';
-                        break;
-                    default:
-                        symbol = parity.symbol
-                        break;
-                }
     
-                subscription_param.push(`${symbol.toLowerCase()}@kline_${resolution}`);
+    allresolutions.forEach(resolution => {
+        // if(resolution == '1m'){
+            list.forEach(p => {
+                subscription_param.push(`${p.symbol.toLowerCase()}@kline_${resolution}`);
             });
-        }
-
-        subscription_param.push(`btcusdt@kline_1m`);
+        // }
     });
 
     getCandle(cache);
-    
-    setInterval(() => {
-        getCandle(cache);
-    }, 60000 * 60 * 24);
 }
 
 async function dbSync(symbol, resolution, response, amount) {
-    symbol = fixSymbol(symbol);
+    let parity = allParities.filter(p => {
+        return p.symbol == symbol
+    });
 
-    let parity = Object.values(allParities).filter(p => p.symbol == symbol)[0];
-    
-    DBConn.query(`INSERT INTO 
-                candle (parity, mts, open, close, high, low, volume) 
-                VALUES (${parity.id}, "${response.data.k.t}", "${response.data.k.o}", "${amount}", "${response.data.k.h}", "${response.data.k.l}", "${response.data.k.v}")
+    DBConn.query(`INSERT INTO kline (parity, mts, open, close, high, low, volume) 
+                VALUES (${parity[0].parity}, "${response.data.k.t}", "${response.data.k.o}", "${amount}", "${response.data.k.h}", "${response.data.k.l}", "${response.data.k.v}")
                 ON DUPLICATE KEY UPDATE 
                 open = "${response.data.k.o}",
                 close = "${amount}",
@@ -157,6 +112,7 @@ async function getCandle(cache) {
                             symbol = symbol.toUpperCase();
 
                             cache.set(`${symbol}/${resolution}`, JSON.stringify(data));
+                            dbSync(symbol, resolution, response, amount)
                         break;
                     }
                 }
