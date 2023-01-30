@@ -11,12 +11,13 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "axios": "^0.27.2",
-    "dotenv": "^16.0.1",
+    "axios": "^1.2.5",
+    "dotenv": "^16.0.3",
     "locutus": "^2.0.16",
     "mysql": "^2.18.1",
+    "mysql2": "^3.0.1",
     "node-cache": "^5.1.2",
-    "ws": "^8.8.0"
+    "ws": "^8.12.0"
   },
   "description": ""
 }

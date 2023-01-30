@@ -1,0 +1,37 @@
+version: "3.7"
+
+services:
+  wskline:
+    image: yngviwarrior/ws-cripto-klines
+    container_name: ws-cripto-klines
+    restart: always
+    logging:
+      driver: none
+    ports:
+    - "3000:3000"
+    networks:
+      - wsklines_network
+    depends_on:
+    - wsklinedb
+  wsklinedb:
+    image: mysql
+    restart: always
+    logging:
+      driver: none
+    container_name: db
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    volumes:
+      - data:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - wsklines_network
+
+volumes:
+  data:
+
+networks:
+  wsklines_network:
+    driver: bridge
