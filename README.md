@@ -2,9 +2,9 @@
 
 - Pre-requisites
   
-  Node version: 19
-  Docker
-  Any testable tool with WS protocol like Postman or Insomnia.
+  Node version: 19 <br>
+  Docker <br>
+  Any testable tool with WS protocol like Postman or Insomnia. 
 
 - Project Resume
 
