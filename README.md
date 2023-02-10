@@ -12,8 +12,6 @@
 
   URL Parttern: ws://your-ipv4-or-localhost:3000/candle/{PARITY}/{RESOLUTION}
 
-  *Highly recommend use Postman for test WS connection.*
-
   Parity Example: BTCUSDT, ETHUSDT, USDTBRL
   Resolution Example: 1m, 5m, 15m, 30m, 1h, 1d
 
@@ -36,8 +34,8 @@
   Binance Rest API
   https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#general-api-information
 
-  Binance Socket API
+   Binance Socket API
   https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md
 
-  Bitfinex API
-  https://docs.bitfinex.com/docs#api-v1-or-api-v2
+  <!-- Bitfinex API
+  https://docs.bitfinex.com/docs#api-v1-or-api-v2 -->
