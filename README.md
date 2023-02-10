@@ -27,7 +27,7 @@
 
   Step 5: $ docker-compose down && docker-compose up -d
 
-  The Project is Ready ! Open your Postman
+  <b>The Project is Ready ! Open your Postman</b>
 
 - Used APIs Documentations
 
