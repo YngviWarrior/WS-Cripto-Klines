@@ -39,3 +39,5 @@
 
   <!-- Bitfinex API
   https://docs.bitfinex.com/docs#api-v1-or-api-v2 -->
+
+MIT LICENSE
